@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV to Image Converter</title>
+    <link href="https://fonts.googleapis.com/css2?family=Just+Another+Hand&family=Indie+Flower&family=Architects+Daughter&family=Kalam&family=Caveat&family=Shadows+Into+Light&family=Patrick+Hand&family=Gloria+Hallelujah&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📝</text></svg>">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>CSV to Image Converter</h1>
+            <button id="themeToggle" class="theme-toggle" title="Toggle dark mode">
+                <span class="theme-icon">🌙</span>
+            </button>
+        </div>
+        <form class="upload-form" id="uploadForm">
+            <input type="file" name="file" accept=".csv" class="file-input" required>
+            <button type="submit" class="submit-btn">Generate Images</button>
+        </form>
+        <button id="downloadAllBtn" class="download-all-btn" style="display: none;">Download All Images</button>
+        <div class="instructions">
+            <h3>Instructions:</h3>
+            <ul>
+                <li>Upload a CSV file containing a 'Message' column</li>
+                <li>Each message will be overlaid on a random image from the images directory</li>
+                <li>Images will be displayed below and can be downloaded individually or all at once</li>
+            </ul>
+        </div>
+        <div id="preview"></div>
+    </div>
+</body>
+</html>
