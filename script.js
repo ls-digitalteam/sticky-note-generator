@@ -67,7 +67,9 @@ function createImageWithText(imageUrl, text, options = {}) {
             
             // Configure text with the selected font
             const selectedFont = options.fontFamily || 'Just Another Hand';
+            console.log('Selected font:', selectedFont);
             ctx.font = `${fontSize}px "${selectedFont}"`;
+            console.log('Applied font:', ctx.font);
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             
@@ -109,6 +111,11 @@ function createImageWithText(imageUrl, text, options = {}) {
                 ctx.rotate(options.rotation * Math.PI / 180);
                 ctx.translate(-canvas.width/2, -canvas.height/2);
             }
+            
+            // Reapply font after any transformations
+            ctx.font = `${fontSize}px "${selectedFont}"`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
             
             // Draw each line of text
             wrappedText.forEach((line, index) => {
@@ -357,6 +364,7 @@ document.getElementById('uploadForm').addEventListener('submit', async (e) => {
                 
                 // Add event listener for font select
                 fontSelectGroup.querySelector('.font-select').addEventListener('change', () => {
+                    console.log('Font changed to:', fontSelectGroup.querySelector('.font-select').value);
                     updateImage(container, imageUrl, message, {
                         maxFontSize: parseInt(fontSizeGroup.querySelector('.max-font-size').value),
                         minFontSize: parseInt(fontSizeGroup.querySelector('.min-font-size').value),
