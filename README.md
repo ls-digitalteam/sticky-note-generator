@@ -13,7 +13,7 @@ This web application allows you to upload a CSV file containing messages and gen
 
 ### Image Customization
 - **Font selection** - Choose from 8 handwriting-style fonts
-- **Font size control** - Adjust min and max font sizes with live preview
+- **Font size control** - Adjust max font size with live preview
 - **Text color picker** - Customize text color for each image
 - **Rotation control** - Rotate text from -45° to 45°
 - **Line height adjustment** - Fine-tune text spacing
@@ -57,7 +57,6 @@ The parser handles commas within quoted messages correctly, so feel free to use 
 
 For each generated image, you can adjust:
 - **Max Font Size** (60-200): Maximum size for short text
-- **Min Font Size** (20-100): Minimum size for long text
 - **Line Height** (1.0-2.0): Spacing between lines
 - **Width** (100-500): Text wrapping width
 - **Rotation** (-45° to 45°): Angle of the text

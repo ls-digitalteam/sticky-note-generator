@@ -22,7 +22,6 @@ function getOptionsFromControls(container) {
     
     return {
         maxFontSize: parseInt(fontSizeGroup.querySelector('.max-font-size').value),
-        minFontSize: parseInt(fontSizeGroup.querySelector('.min-font-size').value),
         maxWidth: parseInt(widthGroup.querySelector('.max-width').value),
         rotation: parseInt(rotationGroup.querySelector('.rotation').value),
         lineHeight: parseFloat(lineHeightGroup.querySelector('.line-height').value),
@@ -119,13 +118,10 @@ function createImageWithText(imageUrl, text, options = {}) {
             
             // Calculate font size based on text length and custom size
             const maxFontSize = options.maxFontSize || 150;
-            const minFontSize = options.minFontSize || 60;
             const maxChars = options.maxChars || 40;
             
-            const fontSize = Math.max(
-                minFontSize,
-                maxFontSize - ((text.length / maxChars) * (maxFontSize - minFontSize))
-            );
+            // Calculate font size - scales down proportionally with text length
+            const fontSize = maxFontSize - ((text.length / maxChars) * maxFontSize);
             
             // Configure text with the selected font
             const selectedFont = options.fontFamily || 'Just Another Hand';
@@ -158,7 +154,7 @@ function createImageWithText(imageUrl, text, options = {}) {
             const wrappedText = wrapText(text, maxWidth);
             
             // Calculate vertical positioning
-            const lineHeight = fontSize * (options.lineHeight || 1.2);
+            const lineHeight = fontSize * (options.lineHeight || 1);
             const totalHeight = wrappedText.length * lineHeight;
             const verticalPadding = (canvas.height - totalHeight) / 2;
             
@@ -336,25 +332,23 @@ async function processCSVFile(file) {
                 const fontSizeGroup = document.createElement('div');
                 fontSizeGroup.className = 'control-group';
                 fontSizeGroup.innerHTML = `
-                    <label>Max Size: <span class="value">150</span></label>
-                    <input type="range" min="60" max="200" value="150" class="max-font-size" aria-label="Maximum font size">
-                    <label>Min Size: <span class="value">60</span></label>
-                    <input type="range" min="20" max="100" value="60" class="min-font-size" aria-label="Minimum font size">
+                    <label>Font Size: <span class="value" data-for="max-font-size">150</span></label>
+                    <input type="range" min="60" max="200" value="150" class="max-font-size" aria-label="Font size">
                 `;
                 
                 // Line height control with value display
                 const lineHeightGroup = document.createElement('div');
                 lineHeightGroup.className = 'control-group';
                 lineHeightGroup.innerHTML = `
-                    <label>Line Height: <span class="value">1.2</span></label>
-                    <input type="range" min="1" max="2" step="0.1" value="1.2" class="line-height" aria-label="Line height">
+                    <label>Line Height: <span class="value" data-for="line-height">1</span></label>
+                    <input type="range" min="1" max="2" step="0.1" value="1" class="line-height" aria-label="Line height">
                 `;
                 
                 // Width control with value display
                 const widthGroup = document.createElement('div');
                 widthGroup.className = 'control-group';
                 widthGroup.innerHTML = `
-                    <label>Width: <span class="value">300</span></label>
+                    <label>Width: <span class="value" data-for="max-width">300</span></label>
                     <input type="range" min="100" max="500" value="300" class="max-width" aria-label="Text width">
                 `;
                 
@@ -362,7 +356,7 @@ async function processCSVFile(file) {
                 const rotationGroup = document.createElement('div');
                 rotationGroup.className = 'control-group';
                 rotationGroup.innerHTML = `
-                    <label>Rotation: <span class="value">0</span>°</label>
+                    <label>Rotation: <span class="value" data-for="rotation">0</span>°</label>
                     <input type="range" min="-45" max="45" value="0" class="rotation" aria-label="Text rotation">
                 `;
                 
@@ -403,9 +397,27 @@ async function processCSVFile(file) {
                 
                 // Helper to update value displays
                 function updateValueDisplay(input) {
-                    const label = input.parentElement.querySelector('.value');
-                    if (label) {
-                        label.textContent = input.value;
+                    // Get the input's class name to match with corresponding value display
+                    const inputClass = input.className.split(' ').find(cls => 
+                        cls.includes('font-size') || cls.includes('line-height') || 
+                        cls.includes('max-width') || cls.includes('rotation')
+                    );
+                    
+                    if (inputClass) {
+                        const valueSpan = container.querySelector(`.value[data-for="${inputClass}"]`);
+                        if (valueSpan) {
+                            valueSpan.textContent = input.value;
+                            return;
+                        }
+                    }
+                    
+                    // Fallback: find the closest preceding label
+                    let previousElement = input.previousElementSibling;
+                    if (previousElement && previousElement.tagName === 'LABEL') {
+                        const valueSpan = previousElement.querySelector('.value');
+                        if (valueSpan) {
+                            valueSpan.textContent = input.value;
+                        }
                     }
                 }
                 
