@@ -119,9 +119,13 @@ function createImageWithText(imageUrl, text, options = {}) {
             // Calculate font size based on text length and custom size
             const maxFontSize = options.maxFontSize || 150;
             const maxChars = options.maxChars || 40;
+            const minReadableSize = 80; // Minimum size to keep text readable
             
-            // Calculate font size - scales down proportionally with text length
-            const fontSize = maxFontSize - ((text.length / maxChars) * maxFontSize);
+            // Calculate font size - scales down proportionally with text length but stays readable
+            const fontSize = Math.max(
+                minReadableSize,
+                maxFontSize - ((text.length / maxChars) * (maxFontSize - minReadableSize))
+            );
             
             // Configure text with the selected font
             const selectedFont = options.fontFamily || 'Just Another Hand';
