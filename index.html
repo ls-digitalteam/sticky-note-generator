@@ -14,24 +14,26 @@
     <div class="container">
         <div class="header">
             <h1>CSV to Image Converter</h1>
-            <button id="themeToggle" class="theme-toggle" title="Toggle dark mode">
-                <span class="theme-icon">🌙</span>
+            <button id="themeToggle" class="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode">
+                <span class="theme-icon" aria-hidden="true">🌙</span>
             </button>
         </div>
-        <form class="upload-form" id="uploadForm">
-            <input type="file" name="file" accept=".csv" class="file-input" required>
+        <form class="upload-form" id="uploadForm" aria-label="Upload CSV file">
+            <input type="file" name="file" accept=".csv" class="file-input" required aria-label="CSV file input" aria-describedby="instructions">
             <button type="submit" class="submit-btn">Generate Images</button>
+            <p style="margin: 0; color: #666; font-size: 14px;" aria-live="polite">Or drag and drop your CSV file here</p>
         </form>
-        <button id="downloadAllBtn" class="download-all-btn" style="display: none;">Download All Images</button>
-        <div class="instructions">
+        <button id="downloadAllBtn" class="download-all-btn" style="display: none;" aria-label="Download all generated images as a zip file">Download All Images</button>
+        <div class="instructions" id="instructions">
             <h3>Instructions:</h3>
             <ul>
-                <li>Upload a CSV file containing a 'Message' column</li>
-                <li>Each message will be overlaid on a random image from the images directory</li>
-                <li>Images will be displayed below and can be downloaded individually or all at once</li>
+                <li>Upload a CSV file containing a 'Message' column (optionally include 'First Name' for file naming)</li>
+                <li>Each message will be overlaid on a random colorful sticky note image</li>
+                <li>Customize each image with font, size, color, rotation, and other settings</li>
+                <li>Images can be downloaded individually or all at once as a zip file</li>
             </ul>
         </div>
-        <div id="preview"></div>
+        <div id="preview" role="region" aria-label="Generated images" aria-live="polite"></div>
     </div>
 </body>
 </html>

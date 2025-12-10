@@ -1,3 +1,65 @@
+// Utility: Debounce function for performance optimization
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// Utility: Helper to build options object (DRY principle)
+function getOptionsFromControls(container) {
+    const fontSizeGroup = container.querySelector('.control-group:has(.max-font-size)');
+    const lineHeightGroup = container.querySelector('.control-group:has(.line-height)');
+    const widthGroup = container.querySelector('.control-group:has(.max-width)');
+    const rotationGroup = container.querySelector('.control-group:has(.rotation)');
+    const fontSelectGroup = container.querySelector('.control-group:has(.font-select)');
+    const colorPicker = container.querySelector('.text-color');
+    
+    return {
+        maxFontSize: parseInt(fontSizeGroup.querySelector('.max-font-size').value),
+        minFontSize: parseInt(fontSizeGroup.querySelector('.min-font-size').value),
+        maxWidth: parseInt(widthGroup.querySelector('.max-width').value),
+        rotation: parseInt(rotationGroup.querySelector('.rotation').value),
+        lineHeight: parseFloat(lineHeightGroup.querySelector('.line-height').value),
+        fontFamily: fontSelectGroup.querySelector('.font-select').value,
+        textColor: colorPicker ? colorPicker.value : '#000000',
+        firstName: container.dataset.firstName
+    };
+}
+
+// Utility: Better CSV parsing that handles quoted values with commas
+function parseCSVLine(line) {
+    const result = [];
+    let current = '';
+    let inQuotes = false;
+    
+    for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        const nextChar = line[i + 1];
+        
+        if (char === '"') {
+            if (inQuotes && nextChar === '"') {
+                current += '"';
+                i++;
+            } else {
+                inQuotes = !inQuotes;
+            }
+        } else if (char === ',' && !inQuotes) {
+            result.push(current.trim());
+            current = '';
+        } else {
+            current += char;
+        }
+    }
+    result.push(current.trim());
+    return result;
+}
+
 // Theme toggle functionality
 const themeToggle = document.getElementById('themeToggle');
 const themeIcon = themeToggle.querySelector('.theme-icon');
@@ -67,9 +129,7 @@ function createImageWithText(imageUrl, text, options = {}) {
             
             // Configure text with the selected font
             const selectedFont = options.fontFamily || 'Just Another Hand';
-            console.log('Selected font:', selectedFont);
             ctx.font = `${fontSize}px "${selectedFont}"`;
-            console.log('Applied font:', ctx.font);
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             
@@ -112,14 +172,10 @@ function createImageWithText(imageUrl, text, options = {}) {
                 ctx.translate(-canvas.width/2, -canvas.height/2);
             }
             
-            // Reapply font after any transformations
-            ctx.font = `${fontSize}px "${selectedFont}"`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            
-            // Draw each line of text
+            // Draw each line of text with custom color
+            const textColor = options.textColor || '#000000';
             wrappedText.forEach((line, index) => {
-                ctx.fillStyle = 'black';
+                ctx.fillStyle = textColor;
                 const y = verticalPadding + (index * lineHeight) + (lineHeight / 2);
                 ctx.fillText(line, canvas.width/2, y);
             });
@@ -141,14 +197,19 @@ function createImageWithText(imageUrl, text, options = {}) {
 const downloadAllBtn = document.getElementById('downloadAllBtn');
 let generatedImages = new Map(); // Store generated images with their filenames
 
-// Modify the updateImage function to not store the generated image
+// Update image function with loading state
 const updateImage = async (container, imageUrl, message, options) => {
     const img = container.querySelector('img');
-    const imageData = await createImageWithText(imageUrl, message, options);
-    img.src = imageData;
-
-    // Show download all button if we have images
-    downloadAllBtn.style.display = 'block';
+    container.classList.add('loading');
+    
+    try {
+        const imageData = await createImageWithText(imageUrl, message, options);
+        img.src = imageData;
+        // Show download all button if we have images
+        downloadAllBtn.style.display = 'block';
+    } finally {
+        container.classList.remove('loading');
+    }
 };
 
 // Add a function to store all current images
@@ -205,12 +266,8 @@ downloadAllBtn.addEventListener('click', async () => {
     }
 });
 
-// Modify the file upload handler to use the new updateImage function
-document.getElementById('uploadForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const file = e.target.file.files[0];
-    if (!file) return;
-
+// Process CSV file helper
+async function processCSVFile(file) {
     // Clear previous images
     generatedImages.clear();
     downloadAllBtn.style.display = 'none';
@@ -220,9 +277,8 @@ document.getElementById('uploadForm').addEventListener('submit', async (e) => {
         const csv = event.target.result;
         const lines = csv.split('\n').filter(line => line.trim());
         
-        const headers = lines[0].split(',').map(header => {
-            return header.replace(/^"|"$/g, '').trim();
-        });
+        // Use improved CSV parsing
+        const headers = parseCSVLine(lines[0]);
         
         const messageIndex = headers.findIndex(h => h.toLowerCase() === 'message');
         const firstNameIndex = headers.findIndex(h => h.toLowerCase() === 'first name');
@@ -234,16 +290,31 @@ document.getElementById('uploadForm').addEventListener('submit', async (e) => {
 
         const preview = document.getElementById('preview');
         preview.innerHTML = '';
+        
+        // Show progress for large files
+        const totalRows = lines.length - 1;
+        if (totalRows > 10) {
+            const progressDiv = document.createElement('div');
+            progressDiv.className = 'progress-indicator';
+            progressDiv.innerHTML = '<div class="progress-bar"><div class="progress-fill"></div></div><div class="progress-text">Processing images...</div>';
+            preview.appendChild(progressDiv);
+        }
 
         for (let i = 1; i < lines.length; i++) {
-            const values = lines[i].split(',').map(value => {
-                return value.replace(/^"|"$/g, '').trim();
-            });
+            // Use improved CSV parsing
+            const values = parseCSVLine(lines[i]);
             
             const message = values[messageIndex];
             if (!message) continue;
             
             const firstName = firstNameIndex !== -1 ? values[firstNameIndex] : 'image';
+            
+            // Update progress bar if it exists
+            const progressFill = preview.querySelector('.progress-fill');
+            if (progressFill) {
+                const progress = ((i) / totalRows) * 100;
+                progressFill.style.width = `${progress}%`;
+            }
             
             try {
                 let imageUrl = getRandomImage();
@@ -261,46 +332,54 @@ document.getElementById('uploadForm').addEventListener('submit', async (e) => {
                 const controls = document.createElement('div');
                 controls.className = 'controls';
                 
-                // Font size controls
+                // Font size controls with value display
                 const fontSizeGroup = document.createElement('div');
                 fontSizeGroup.className = 'control-group';
                 fontSizeGroup.innerHTML = `
-                    <label>Max Size:</label>
-                    <input type="range" min="60" max="200" value="150" class="max-font-size">
-                    <label>Min Size:</label>
-                    <input type="range" min="20" max="100" value="60" class="min-font-size">
+                    <label>Max Size: <span class="value">150</span></label>
+                    <input type="range" min="60" max="200" value="150" class="max-font-size" aria-label="Maximum font size">
+                    <label>Min Size: <span class="value">60</span></label>
+                    <input type="range" min="20" max="100" value="60" class="min-font-size" aria-label="Minimum font size">
                 `;
                 
-                // Line height control
+                // Line height control with value display
                 const lineHeightGroup = document.createElement('div');
                 lineHeightGroup.className = 'control-group';
                 lineHeightGroup.innerHTML = `
-                    <label>Line Height:</label>
-                    <input type="range" min="1" max="2" step="0.1" value="1.2" class="line-height">
+                    <label>Line Height: <span class="value">1.2</span></label>
+                    <input type="range" min="1" max="2" step="0.1" value="1.2" class="line-height" aria-label="Line height">
                 `;
                 
-                // Width control
+                // Width control with value display
                 const widthGroup = document.createElement('div');
                 widthGroup.className = 'control-group';
                 widthGroup.innerHTML = `
-                    <label>Width:</label>
-                    <input type="range" min="100" max="500" value="300" class="max-width">
+                    <label>Width: <span class="value">300</span></label>
+                    <input type="range" min="100" max="500" value="300" class="max-width" aria-label="Text width">
                 `;
                 
-                // Rotation control
+                // Rotation control with value display
                 const rotationGroup = document.createElement('div');
                 rotationGroup.className = 'control-group';
                 rotationGroup.innerHTML = `
-                    <label>Rotation:</label>
-                    <input type="range" min="-45" max="45" value="0" class="rotation">
+                    <label>Rotation: <span class="value">0</span>°</label>
+                    <input type="range" min="-45" max="45" value="0" class="rotation" aria-label="Text rotation">
+                `;
+                
+                // Text color control
+                const colorGroup = document.createElement('div');
+                colorGroup.className = 'control-group';
+                colorGroup.innerHTML = `
+                    <label for="color-${i}">Text Color:</label>
+                    <input type="color" id="color-${i}" value="#000000" class="text-color" aria-label="Text color">
                 `;
                 
                 // Font selection
                 const fontSelectGroup = document.createElement('div');
                 fontSelectGroup.className = 'control-group';
                 fontSelectGroup.innerHTML = `
-                    <label>Font:</label>
-                    <select class="font-select">
+                    <label for="font-${i}">Font:</label>
+                    <select id="font-${i}" class="font-select" aria-label="Font family">
                         ${availableFonts.map(font => `<option value="${font.name}" ${font.name === 'Just Another Hand' ? 'selected' : ''}>${font.display}</option>`).join('')}
                     </select>
                 `;
@@ -315,11 +394,20 @@ document.getElementById('uploadForm').addEventListener('submit', async (e) => {
                 controls.appendChild(lineHeightGroup);
                 controls.appendChild(widthGroup);
                 controls.appendChild(rotationGroup);
+                controls.appendChild(colorGroup);
                 controls.appendChild(fontSelectGroup);
                 controls.appendChild(regenerateBtn);
                 
                 // Add controls to container
                 container.appendChild(controls);
+                
+                // Helper to update value displays
+                function updateValueDisplay(input) {
+                    const label = input.parentElement.querySelector('.value');
+                    if (label) {
+                        label.textContent = input.value;
+                    }
+                }
                 
                 // Add download button
                 const downloadBtn = document.createElement('button');
@@ -339,60 +427,106 @@ document.getElementById('uploadForm').addEventListener('submit', async (e) => {
                 preview.appendChild(container);
                 
                 // Initial image generation
-                await updateImage(container, imageUrl, message, {
-                    maxFontSize: parseInt(fontSizeGroup.querySelector('.max-font-size').value),
-                    minFontSize: parseInt(fontSizeGroup.querySelector('.min-font-size').value),
-                    maxWidth: parseInt(widthGroup.querySelector('.max-width').value),
-                    rotation: parseInt(rotationGroup.querySelector('.rotation').value),
-                    lineHeight: parseFloat(lineHeightGroup.querySelector('.line-height').value),
-                    fontFamily: fontSelectGroup.querySelector('.font-select').value,
-                    firstName: firstName
-                });
+                await updateImage(container, imageUrl, message, getOptionsFromControls(container));
                 
-                // Add event listeners to controls
-                controls.querySelectorAll('input').forEach(input => {
-                    input.addEventListener('input', () => updateImage(container, imageUrl, message, {
-                        maxFontSize: parseInt(fontSizeGroup.querySelector('.max-font-size').value),
-                        minFontSize: parseInt(fontSizeGroup.querySelector('.min-font-size').value),
-                        maxWidth: parseInt(widthGroup.querySelector('.max-width').value),
-                        rotation: parseInt(rotationGroup.querySelector('.rotation').value),
-                        lineHeight: parseFloat(lineHeightGroup.querySelector('.line-height').value),
-                        fontFamily: fontSelectGroup.querySelector('.font-select').value,
-                        firstName: firstName
-                    }));
-                });
+                // Create debounced update function for sliders (300ms delay)
+                const debouncedUpdate = debounce(() => {
+                    updateImage(container, imageUrl, message, getOptionsFromControls(container));
+                }, 300);
                 
-                // Add event listener for font select
-                fontSelectGroup.querySelector('.font-select').addEventListener('change', () => {
-                    console.log('Font changed to:', fontSelectGroup.querySelector('.font-select').value);
-                    updateImage(container, imageUrl, message, {
-                        maxFontSize: parseInt(fontSizeGroup.querySelector('.max-font-size').value),
-                        minFontSize: parseInt(fontSizeGroup.querySelector('.min-font-size').value),
-                        maxWidth: parseInt(widthGroup.querySelector('.max-width').value),
-                        rotation: parseInt(rotationGroup.querySelector('.rotation').value),
-                        lineHeight: parseFloat(lineHeightGroup.querySelector('.line-height').value),
-                        fontFamily: fontSelectGroup.querySelector('.font-select').value,
-                        firstName: firstName
+                // Add event listeners to range inputs with debouncing
+                controls.querySelectorAll('input[type="range"]').forEach(input => {
+                    input.addEventListener('input', () => {
+                        updateValueDisplay(input);
+                        debouncedUpdate();
                     });
+                });
+                
+                // Add event listener for color picker (instant update)
+                colorGroup.querySelector('.text-color').addEventListener('change', () => {
+                    updateImage(container, imageUrl, message, getOptionsFromControls(container));
+                });
+                
+                // Add event listener for font select (instant update)
+                fontSelectGroup.querySelector('.font-select').addEventListener('change', () => {
+                    updateImage(container, imageUrl, message, getOptionsFromControls(container));
                 });
                 
                 // Update regenerate button
                 regenerateBtn.addEventListener('click', () => {
                     imageUrl = getRandomImage();
-                    updateImage(container, imageUrl, message, {
-                        maxFontSize: parseInt(fontSizeGroup.querySelector('.max-font-size').value),
-                        minFontSize: parseInt(fontSizeGroup.querySelector('.min-font-size').value),
-                        maxWidth: parseInt(widthGroup.querySelector('.max-width').value),
-                        rotation: parseInt(rotationGroup.querySelector('.rotation').value),
-                        lineHeight: parseFloat(lineHeightGroup.querySelector('.line-height').value),
-                        fontFamily: fontSelectGroup.querySelector('.font-select').value,
-                        firstName: firstName
-                    });
+                    updateImage(container, imageUrl, message, getOptionsFromControls(container));
                 });
             } catch (error) {
                 console.error(`Error processing row ${i}:`, error);
             }
         }
+        
+        // Remove progress indicator if it exists
+        const progressIndicator = preview.querySelector('.progress-indicator');
+        if (progressIndicator) {
+            progressIndicator.remove();
+        }
     };
     reader.readAsText(file);
+}
+
+// File upload form handler
+document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const file = e.target.file.files[0];
+    if (!file) return;
+    await processCSVFile(file);
+});
+
+// Drag and drop functionality
+const uploadForm = document.getElementById('uploadForm');
+const fileInput = uploadForm.querySelector('input[type="file"]');
+
+['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    uploadForm.addEventListener(eventName, preventDefaults, false);
+});
+
+function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+}
+
+['dragenter', 'dragover'].forEach(eventName => {
+    uploadForm.addEventListener(eventName, () => {
+        uploadForm.classList.add('drag-over');
+    }, false);
+});
+
+['dragleave', 'drop'].forEach(eventName => {
+    uploadForm.addEventListener(eventName, () => {
+        uploadForm.classList.remove('drag-over');
+    }, false);
+});
+
+uploadForm.addEventListener('drop', async (e) => {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    
+    if (files.length > 0 && files[0].name.endsWith('.csv')) {
+        fileInput.files = files;
+        await processCSVFile(files[0]);
+    }
+}, false);
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+    // Ctrl/Cmd + D: Download all images
+    if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+        e.preventDefault();
+        if (downloadAllBtn.style.display !== 'none') {
+            downloadAllBtn.click();
+        }
+    }
+    
+    // Ctrl/Cmd + R: Regenerate all images
+    if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+        e.preventDefault();
+        document.querySelectorAll('.regenerate-btn').forEach(btn => btn.click());
+    }
 });
