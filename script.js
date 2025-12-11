@@ -70,7 +70,7 @@ updateThemeIcon();
 
 function updateThemeIcon() {
     const isDark = document.body.classList.contains('dark-mode');
-    themeIcon.textContent = isDark ? '☀️' : '🌙';
+    themeIcon.textContent = isDark ? '☀' : '⏾';
 }
 
 themeToggle.addEventListener('click', () => {

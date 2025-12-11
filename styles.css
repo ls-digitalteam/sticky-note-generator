@@ -3,7 +3,7 @@ body {
     max-width: 800px;
     margin: 0 auto;
     padding: 20px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background-image: linear-gradient(-90deg, #faa545, #f36c21 68%);
     min-height: 100vh;
     transition: background 0.3s ease, color 0.3s ease;
     display: flex;
@@ -41,43 +41,46 @@ body.dark-mode {
 }
 
 .theme-toggle {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.5);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 2px solid rgba(0, 0, 0, 0.3);
     border-radius: 50%;
-    width: 40px;
-    height: 40px;
+    width: 45px;
+    height: 45px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
+    font-size: 24px;
     transition: all 0.3s ease;
-    color: rgba(255, 255, 255, 0.9);
+    color: rgba(0, 0, 0, 0.9);
+    font-weight: bold;
 }
 
 .theme-toggle:hover {
-    background: rgba(255, 255, 255, 0.3);
-    transform: scale(1.05);
+    background: rgba(255, 255, 255, 0.65);
+    transform: scale(1.08);
+    border-color: rgba(0, 0, 0, 0.4);
 }
 
 .dark-mode .theme-toggle {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 1);
 }
 
 .dark-mode .theme-toggle:hover {
-    background: rgba(255, 255, 255, 0.15);
-    transform: scale(1.05);
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(1.08);
+    border-color: rgba(255, 255, 255, 0.4);
 }
 
 h1 {
-    color: rgba(255, 255, 255, 0.95);
+    color: rgba(0, 0, 0, 0.85);
     text-align: center;
     margin: 0;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.3);
     transition: color 0.3s ease;
 }
 
@@ -98,6 +101,11 @@ h1 {
 }
 
 .upload-form p {
+    color: rgba(0, 0, 0, 0.8);
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
+}
+
+.dark-mode .upload-form p {
     color: rgba(255, 255, 255, 0.85);
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
@@ -115,16 +123,16 @@ h1 {
 
 .file-input {
     padding: 10px;
-    border: 2px dashed rgba(255, 255, 255, 0.4);
+    border: 2px dashed rgba(0, 0, 0, 0.3);
     border-radius: 12px;
     width: 100%;
     max-width: 400px;
     text-align: center;
     cursor: pointer;
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.4);
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
-    color: rgba(255, 255, 255, 0.95);
+    color: rgba(0, 0, 0, 0.85);
     transition: all 0.3s ease;
 }
 
@@ -135,11 +143,11 @@ h1 {
 }
 
 .submit-btn {
-    background: rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.4);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: white;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    color: rgba(0, 0, 0, 0.85);
     padding: 12px 24px;
     border-radius: 12px;
     cursor: pointer;
@@ -149,22 +157,32 @@ h1 {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
+.dark-mode .submit-btn {
+    background: rgba(255, 255, 255, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+}
+
 .submit-btn:hover {
-    background: rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.5);
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.dark-mode .submit-btn:hover {
+    background: rgba(255, 255, 255, 0.35);
 }
 
 .instructions {
     margin-top: 20px;
     padding: 15px;
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.3);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-left: 4px solid rgba(255, 255, 255, 0.5);
-    color: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-left: 4px solid rgba(0, 0, 0, 0.3);
+    color: rgba(0, 0, 0, 0.85);
     transition: all 0.3s ease;
 }
 
@@ -172,6 +190,7 @@ h1 {
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-left-color: rgba(255, 255, 255, 0.4);
+    color: rgba(255, 255, 255, 0.95);
 }
 
 #preview {
@@ -267,15 +286,15 @@ h1 {
     display: flex;
     align-items: center;
     gap: 5px;
-    color: rgba(255, 255, 255, 0.95);
+    color: rgba(0, 0, 0, 0.85);
 }
 
 .control-group label .value {
     font-weight: 700;
-    color: rgba(255, 255, 255, 1);
+    color: rgba(0, 0, 0, 0.9);
     min-width: 30px;
     text-align: right;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
 }
 
 .dark-mode .control-group label {
@@ -318,13 +337,13 @@ h1 {
     flex: 1;
     min-width: 100px;
     padding: 5px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(0, 0, 0, 0.2);
     border-radius: 8px;
     font-size: 14px;
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.4);
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
-    color: rgba(255, 255, 255, 0.95);
+    color: rgba(0, 0, 0, 0.85);
     transition: all 0.3s ease;
 }
 
@@ -335,11 +354,11 @@ h1 {
 }
 
 .regenerate-btn {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.4);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: white;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    color: rgba(0, 0, 0, 0.85);
     padding: 8px 16px;
     border-radius: 8px;
     cursor: pointer;
@@ -348,17 +367,27 @@ h1 {
     transition: all 0.3s ease;
 }
 
+.dark-mode .regenerate-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+}
+
 .regenerate-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.5);
     transform: translateY(-1px);
 }
 
+.dark-mode .regenerate-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
 .download-all-btn {
-    background: rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.4);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: white;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    color: rgba(0, 0, 0, 0.85);
     padding: 12px 24px;
     border-radius: 12px;
     cursor: pointer;
@@ -370,10 +399,20 @@ h1 {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
+.dark-mode .download-all-btn {
+    background: rgba(255, 255, 255, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+}
+
 .download-all-btn:hover {
-    background: rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.5);
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.dark-mode .download-all-btn:hover {
+    background: rgba(255, 255, 255, 0.35);
 }
 
 .download-all-btn:disabled {
@@ -424,9 +463,9 @@ h1 {
 
 .progress-text {
     font-size: 14px;
-    color: rgba(255, 255, 255, 0.9);
+    color: rgba(0, 0, 0, 0.85);
     font-weight: 500;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
 }
 
 .dark-mode .progress-text {
@@ -464,7 +503,7 @@ h1 {
     margin-top: 10px;
     font-size: 0.9em;
     font-style: italic;
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(0, 0, 0, 0.65);
 }
 
 .dark-mode .instructions ul::after {
